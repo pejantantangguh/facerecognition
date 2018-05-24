@@ -1,18 +1,18 @@
 import React, { Component } from 'react';
 import Particles from 'react-particles-js';
 import Navigation from './components/Navigation/Navigation';
+import Clarifai from 'clarifai';
 import Logo from './components/Logo/Logo';
 import Rank from './components/Rank/Rank';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
+import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 
 import './App.css';
 import 'tachyons';
 
 {/************** 
- * 
  * Start Particle Settings
  * 
-*
 */}
 const particlesOptions = {
     "particles": {
@@ -126,12 +126,42 @@ const particlesOptions = {
 }
 
 {/*********************
- * 
  * End particle Settings
- * 
 */}
 
+{/***
+Clarifai API key
+*/}
+
+const app = new Clarifai.App({
+  apiKey: 'dcefb1c9b29e40de9ac2e1a6d85d6548',
+});
+
 class App extends Component {
+  constructor() {
+    super()
+
+    this.state = {
+      input: '',
+    }
+  }
+
+  onInput = (e) => {
+    console.log(e.target.value);
+  }
+  
+  onSubmit = () => {
+    console.log('click');
+    app.models.predict("a403429f2ddf4b49b307e318f00e528b", "https://samples.clarifai.com/face-det.jpg")
+              .then(
+    function(response) {
+      console.log(response);
+    },
+    function(err) {
+      console.error(err);
+    }
+  );
+  }
   render() {
     return (
       <div className="App">
@@ -139,8 +169,10 @@ class App extends Component {
         <Navigation />
         <Logo />
         <Rank />
-        <ImageLinkForm />
-        {/* <FaceRecognition />} */}
+        <ImageLinkForm 
+                  onInput = {this.onInput} 
+                  onSubmit = {this.onSubmit} />
+        <FaceRecognition />
       </div>
     );
   }
