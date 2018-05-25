@@ -143,8 +143,33 @@ class App extends Component {
 
     this.state = {
       input: '',
-      imageUrl: ''
+      imageUrl: '',
+      box: {}
     }
+  }
+  calculateFaceLocation = (data) => {
+    //Get calculateFaceLocation based on input from Clarifai.
+    //We are just going to grab one of the faces
+    const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding.box
+    const image = document.getElementById('inputimage');
+    const imageWidth = Number (image.width);
+    const imageHeight = Number (image.height);
+    console.log(imageWidth,imageHeight);
+
+    // We want to return an object and become an box.
+    return {
+      leftCol: clarifaiFace.left_col * imageWidth,
+      topRow: clarifaiFace.top_row * imageHeight,
+      rightCol : imageWidth - (clarifaiFace.right_col * imageWidth),
+      bottomRow : imageHeight - (clarifaiFace.bottom_row * imageHeight) 
+    //Next step is to passed on value above to box on state.
+    }
+
+  }
+
+  displayFaceBox = (box) => {
+    console.log(box)
+    this.setState({box: box});
   }
 
   onInput = (e) => {
@@ -153,18 +178,12 @@ class App extends Component {
   
   onSubmit = () => {
     this.setState({imageUrl: this.state.input});
-    console.log('click');
-    app.models.predict(Clarifai.COLOR_MODEL,
+    app.models.predict(Clarifai.FACE_DETECT_MODEL,
                        this.state.input)
-              .then(
-    function(response) {
-      console.log(response);
-    },
-    function(err) {
-      console.error(err);
-    }
-  );
+              .then(response => console.log(this.calculateFaceLocation(response)))
+              .catch (err => console.log(err));
   }
+
   render() {
     return (
       <div className="App">
